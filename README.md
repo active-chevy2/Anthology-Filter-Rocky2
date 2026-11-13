@@ -1,5 +1,9 @@
 # HTML `rel="me"` Checker
 
+<a href="https://www.aihonestybadge.com" target="_blank" rel="noopener"><img src="https://www.aihonestybadge.com/badges/ai-generated-small.svg" alt="AI Generated" height="20"></a>
+
+> This content has been generated with the assistance of AI. We kindly ask that anyone who feels uncomfortable with AI or its users to please refrain from engaging. Thank you for your understanding.
+
 A lightweight, self-hosted web application that inspects any public webpage for `<a>` and `<link>` elements containing `rel="me"`. Useful for verifying IndieWeb, Mastodon, and Fediverse profile links.
 
 Built with zero external `npm` dependencies using native Node.js 20 APIs and vanilla HTML/CSS/JavaScript.
