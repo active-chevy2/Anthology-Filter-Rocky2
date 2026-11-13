@@ -4,8 +4,8 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: html_web_server
+    environment:
+      - PORT=${CONTAINER_PORT:-80}
     ports:
-      - "${HOST_PORT}:${CONTAINER_PORT}"
+      - "${HOST_PORT:-8080}:${CONTAINER_PORT:-80}"
     restart: unless-stopped
-    volumes:
-      - .:/usr/share/nginx/html:ro  # Optional: Mounts local files for instant live-reload during development
