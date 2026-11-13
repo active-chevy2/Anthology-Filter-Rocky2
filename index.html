@@ -1,1 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTML rel="me" Checker</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 720px;
+      margin: 40px auto;
+      padding: 0 20px;
+      line-height: 1.5;
+      color: #1f2937;
+      background: #f9fafb;
+    }
+    h1 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+    .box {
+      background: #ffffff;
+      padding: 24px;
+      border-radius: 8px;
+      border: 1px solid #e5e7eb;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+    .input-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+    }
+    input[type="url"] {
+      flex: 1;
+      padding: 10px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+    button {
+      padding: 10px 18px;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    button:hover { background: #1d4ed8; }
+    button:disabled { background: #93c5fd; cursor: not-allowed; }
+    #status { margin-top: 16px; font-weight: 500; }
+    .error { color: #dc2626; }
+    .success { color: #16a34a; }
+    ul { list-style: none; padding: 0; margin-top: 16px; }
+    li {
+      background: #f3f4f6;
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 10px;
+      border-left: 4px solid #2563eb;
+      word-break: break-all;
+    }
+    code {
+      background: #e5e7eb;
+      padding: 2px 5px;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+  </style>
+</head>
+<body>
 
+  <div class="box">
+    <h1>HTML <code>rel="me"</code> Checker</h1>
+    <p>Enter any website URL to inspect all <code>&lt;a&gt;</code> and <code>&lt;link&gt;</code> elements containing <code>rel="me"</code>.</p>
+    
+    <div class="input-group">
+      <input type="url" id="urlInput" placeholder="https://example.com" required>
+      <button id="checkBtn" onclick="checkRelMe()">Check URL</button>
+    </div>
+
+    <div id="status"></div>
+    <ul id="results"></ul>
+  </div>
+
+  <script>
+    async function checkRelMe() {
+      const urlInput = document.getElementById('urlInput').value.trim();
+      const statusEl = document.getElementById('status');
+      const resultsEl = document.getElementById('results');
+      const btn = document.getElementById('checkBtn');
+
+      resultsEl.innerHTML = '';
+      statusEl.className = '';
+
+      if (!urlInput) {
+        statusEl.textContent = 'Please enter a valid URL.';
+        statusEl.className = 'error';
+        return;
+      }
+
+      btn.disabled = true;
+      statusEl.textContent = 'Fetching webpage...';
+
+      try {
+        const response = await fetch(`/api/check?url=${encodeURIComponent(urlInput)}`);
+        const data = await response.json();
+
+        if (data.error) {
+          throw new Error(data.error);
+        }
+
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(data.html, 'text/html');
+        const candidates = doc.querySelectorAll('a[rel], link[rel]');
+        const matches = [];
+
+        candidates.forEach(el => {
+          const relTokens = el.getAttribute('rel').toLowerCase().split(/\s+/);
+          if (relTokens.includes('me')) {
+            matches.push({
+              tag: el.tagName.toLowerCase(),
+              href: el.getAttribute('href') || '(no href)',
+              rel: el.getAttribute('rel'),
+              text: el.textContent.trim()
+            });
+          }
+        });
+
+        if (matches.length === 0) {
+          statusEl.textContent = `Page loaded (HTTP ${data.status}), but no rel="me" links were found.`;
+          statusEl.className = 'error';
+        } else {
+          statusEl.textContent = `Success! Found ${matches.length} rel="me" link(s):`;
+          statusEl.className = 'success';
+
+          matches.forEach(item => {
+            const li = document.createElement('li');
+            li.innerHTML = `
+              <div><strong>Tag:</strong> <code>&lt;${item.tag}&gt;</code> | <strong>rel:</strong> <code>${item.rel}</code></div>
+              <div><strong>URL:</strong> <a href="${item.href}" target="_blank" rel="noopener">${item.href}</a></div>
+              ${item.text ? `<div><strong>Link Text:</strong> ${item.text}</div>` : ''}
+            `;
+            resultsEl.appendChild(li);
+          });
+        }
+      } catch (err) {
+        statusEl.textContent = `Error: ${err.message}`;
+        statusEl.className = 'error';
+      } finally {
+        btn.disabled = false;
+      }
+    }
+  </script>
+
+</body>
+</html>
