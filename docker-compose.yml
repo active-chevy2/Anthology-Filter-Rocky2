@@ -1,0 +1,11 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: html_web_server
+    ports:
+      - "${HOST_PORT}:${CONTAINER_PORT}"
+    restart: unless-stopped
+    volumes:
+      - .:/usr/share/nginx/html:ro  # Optional: Mounts local files for instant live-reload during development
