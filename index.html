@@ -5,108 +5,442 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>HTML rel="me" Checker</title>
   <style>
+    :root {
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --surface-alt: #0f172a;
+      --border: #334155;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --accent-disabled: #1e3a8a;
+      --code-bg: #0f172a;
+      --success-bg: rgba(22, 163, 74, 0.14);
+      --success-border: rgba(34, 197, 94, 0.35);
+      --success-text: #4ade80;
+      --warn-bg: rgba(234, 179, 8, 0.14);
+      --warn-border: rgba(250, 204, 21, 0.35);
+      --warn-text: #facc15;
+      --error-bg: rgba(220, 38, 38, 0.14);
+      --error-border: rgba(248, 113, 113, 0.35);
+      --error-text: #f87171;
+    }
+
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f1f5f9;
+        --surface: #ffffff;
+        --surface-alt: #f8fafc;
+        --border: #cbd5e1;
+        --text: #0f172a;
+        --text-muted: #475569;
+        --accent: #2563eb;
+        --accent-hover: #1d4ed8;
+        --accent-disabled: #93c5fd;
+        --code-bg: #e2e8f0;
+        --success-bg: #f0fdf4;
+        --success-border: #86efac;
+        --success-text: #15803d;
+        --warn-bg: #fefce8;
+        --warn-border: #fde047;
+        --warn-text: #a16207;
+        --error-bg: #fef2f2;
+        --error-border: #fca5a5;
+        --error-text: #b91c1c;
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: system-ui, -apple-system, sans-serif;
-      max-width: 720px;
-      margin: 40px auto;
-      padding: 0 20px;
-      line-height: 1.5;
-      color: #1f2937;
-      background: #f9fafb;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      max-width: 760px;
+      margin: 48px auto;
+      padding: 0 16px;
+      line-height: 1.55;
+      color: var(--text);
+      background: var(--bg);
     }
-    h1 { font-size: 1.5rem; margin-bottom: 0.5rem; }
-    .box {
-      background: #ffffff;
-      padding: 24px;
-      border-radius: 8px;
-      border: 1px solid #e5e7eb;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+
+    .card {
+      background: var(--surface);
+      padding: 28px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
     }
+
+    h1 {
+      font-size: 1.5rem;
+      margin: 0 0 8px;
+      letter-spacing: -0.01em;
+    }
+
+    .subtitle {
+      margin: 0 0 20px;
+      color: var(--text-muted);
+      font-size: 0.96rem;
+    }
+
+    code {
+      background: var(--code-bg);
+      padding: 2px 6px;
+      border-radius: 5px;
+      font-size: 0.88em;
+      border: 1px solid var(--border);
+    }
+
     .input-group {
       display: flex;
       gap: 10px;
-      margin-top: 14px;
     }
-    input[type="url"] {
+
+    input[type="text"] {
       flex: 1;
-      padding: 10px 12px;
-      border: 1px solid #d1d5db;
-      border-radius: 6px;
+      padding: 11px 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
       font-size: 1rem;
+      background: var(--surface-alt);
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.15s ease;
     }
-    button {
-      padding: 10px 18px;
-      background: #2563eb;
-      color: white;
+
+    input[type="text"]:focus {
+      border-color: var(--accent);
+    }
+
+    button.primary {
+      padding: 11px 20px;
+      background: var(--accent);
+      color: #ffffff;
       border: none;
-      border-radius: 6px;
-      font-size: 1rem;
+      border-radius: 8px;
+      font-size: 0.98rem;
+      font-weight: 600;
       cursor: pointer;
-      font-weight: 500;
+      white-space: nowrap;
+      transition: background 0.15s ease;
     }
-    button:hover { background: #1d4ed8; }
-    button:disabled { background: #93c5fd; cursor: not-allowed; }
-    #status { margin-top: 16px; font-weight: 500; }
-    .error { color: #dc2626; }
-    .success { color: #16a34a; }
-    ul { list-style: none; padding: 0; margin-top: 16px; }
-    li {
-      background: #f3f4f6;
-      padding: 12px;
-      border-radius: 6px;
-      margin-bottom: 10px;
-      border-left: 4px solid #2563eb;
+
+    button.primary:hover:not(:disabled) {
+      background: var(--accent-hover);
+    }
+
+    button.primary:disabled {
+      background: var(--accent-disabled);
+      cursor: not-allowed;
+      opacity: 0.8;
+    }
+
+    #status {
+      margin-top: 18px;
+      padding: 12px 14px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      display: none;
+    }
+
+    #status.visible {
+      display: block;
+    }
+
+    #status.loading {
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+    }
+
+    #status.success {
+      background: var(--success-bg);
+      border: 1px solid var(--success-border);
+      color: var(--success-text);
+    }
+
+    #status.warn {
+      background: var(--warn-bg);
+      border: 1px solid var(--warn-border);
+      color: var(--warn-text);
+    }
+
+    #status.error {
+      background: var(--error-bg);
+      border: 1px solid var(--error-border);
+      color: var(--error-text);
+    }
+
+    #meta {
+      margin-top: 10px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
       word-break: break-all;
     }
-    code {
-      background: #e5e7eb;
-      padding: 2px 5px;
-      border-radius: 4px;
-      font-size: 0.9em;
+
+    ul#results {
+      list-style: none;
+      padding: 0;
+      margin: 18px 0 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    li.result-item {
+      background: var(--surface-alt);
+      padding: 14px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--accent);
+      word-break: break-all;
+    }
+
+    .result-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+
+    .badges {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    button.copy-btn {
+      padding: 4px 10px;
+      font-size: 0.82rem;
+      font-weight: 500;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    button.copy-btn:hover {
+      border-color: var(--accent);
+    }
+
+    .result-row {
+      margin-top: 4px;
+      font-size: 0.94rem;
+    }
+
+    .result-row strong {
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    a.result-link {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    a.result-link:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 520px) {
+      .card {
+        padding: 20px;
+      }
+      .input-group {
+        flex-direction: column;
+      }
+      button.primary {
+        width: 100%;
+      }
     }
   </style>
 </head>
 <body>
 
-  <div class="box">
+  <main class="card">
     <h1>HTML <code>rel="me"</code> Checker</h1>
-    <p>Enter any website URL to inspect all <code>&lt;a&gt;</code> and <code>&lt;link&gt;</code> elements containing <code>rel="me"</code>.</p>
-    
-    <div class="input-group">
-      <input type="url" id="urlInput" placeholder="https://example.com" required>
-      <button id="checkBtn" onclick="checkRelMe()">Check URL</button>
-    </div>
+    <p class="subtitle">
+      Inspect any webpage for <code>&lt;a&gt;</code> and <code>&lt;link&gt;</code> elements containing <code>rel="me"</code>.
+    </p>
 
-    <div id="status"></div>
+    <form id="checkForm" class="input-group" novalidate>
+      <input
+        type="text"
+        id="urlInput"
+        inputmode="url"
+        autocomplete="url"
+        placeholder="https://example.com"
+        aria-label="Website URL"
+        required
+      >
+      <button type="submit" id="checkBtn" class="primary">Check URL</button>
+    </form>
+
+    <div id="status" role="status" aria-live="polite"></div>
+    <div id="meta"></div>
     <ul id="results"></ul>
-  </div>
+  </main>
 
   <script>
-    async function checkRelMe() {
-      const urlInput = document.getElementById('urlInput').value.trim();
-      const statusEl = document.getElementById('status');
-      const resultsEl = document.getElementById('results');
-      const btn = document.getElementById('checkBtn');
+    const form = document.getElementById('checkForm');
+    const urlInput = document.getElementById('urlInput');
+    const statusEl = document.getElementById('status');
+    const metaEl = document.getElementById('meta');
+    const resultsEl = document.getElementById('results');
+    const checkBtn = document.getElementById('checkBtn');
 
+    function setStatus(message, type) {
+      statusEl.textContent = message;
+      statusEl.className = `visible ${type}`;
+    }
+
+    function normaliseInputUrl(raw) {
+      const trimmed = raw.trim();
+      if (!trimmed) return '';
+      if (!/^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(trimmed)) {
+        return `https://${trimmed}`;
+      }
+      return trimmed;
+    }
+
+    function resolveHref(rawHref, baseUrl) {
+      if (!rawHref) return { displayHref: '(no href)', resolvedUrl: null, isHttp: false };
+      try {
+        const parsed = new URL(rawHref, baseUrl);
+        const isHttp = parsed.protocol === 'http:' || parsed.protocol === 'https:';
+        return {
+          displayHref: rawHref,
+          resolvedUrl: parsed.href,
+          isHttp
+        };
+      } catch {
+        return { displayHref: rawHref, resolvedUrl: null, isHttp: false };
+      }
+    }
+
+    function renderMatchItem(item) {
+      const li = document.createElement('li');
+      li.className = 'result-item';
+
+      const header = document.createElement('div');
+      header.className = 'result-header';
+
+      const badges = document.createElement('div');
+      badges.className = 'badges';
+
+      const tagCode = document.createElement('code');
+      tagCode.textContent = `<${item.tag}>`;
+
+      const relCode = document.createElement('code');
+      relCode.textContent = `rel="${item.rel}"`;
+
+      badges.appendChild(tagCode);
+      badges.appendChild(relCode);
+      header.appendChild(badges);
+
+      if (item.resolvedUrl) {
+        const copyBtn = document.createElement('button');
+        copyBtn.type = 'button';
+        copyBtn.className = 'copy-btn';
+        copyBtn.textContent = 'Copy URL';
+        copyBtn.addEventListener('click', async () => {
+          try {
+            await navigator.clipboard.writeText(item.resolvedUrl);
+            copyBtn.textContent = 'Copied!';
+            setTimeout(() => {
+              copyBtn.textContent = 'Copy URL';
+            }, 1500);
+          } catch {
+            copyBtn.textContent = 'Copy failed';
+          }
+        });
+        header.appendChild(copyBtn);
+      }
+
+      li.appendChild(header);
+
+      const urlRow = document.createElement('div');
+      urlRow.className = 'result-row';
+      const urlLabel = document.createElement('strong');
+      urlLabel.textContent = 'URL: ';
+      urlRow.appendChild(urlLabel);
+
+      if (item.isHttp && item.resolvedUrl) {
+        const anchor = document.createElement('a');
+        anchor.className = 'result-link';
+        anchor.href = item.resolvedUrl;
+        anchor.target = '_blank';
+        anchor.rel = 'noopener noreferrer';
+        anchor.textContent = item.resolvedUrl;
+        urlRow.appendChild(anchor);
+      } else {
+        const plain = document.createElement('span');
+        plain.textContent = item.resolvedUrl || item.displayHref;
+        urlRow.appendChild(plain);
+      }
+
+      li.appendChild(urlRow);
+
+      if (item.resolvedUrl && item.displayHref !== item.resolvedUrl) {
+        const rawRow = document.createElement('div');
+        rawRow.className = 'result-row';
+        const rawLabel = document.createElement('strong');
+        rawLabel.textContent = 'Raw href: ';
+        const rawCode = document.createElement('code');
+        rawCode.textContent = item.displayHref;
+        rawRow.appendChild(rawLabel);
+        rawRow.appendChild(rawCode);
+        li.appendChild(rawRow);
+      }
+
+      if (item.text) {
+        const textRow = document.createElement('div');
+        textRow.className = 'result-row';
+        const textLabel = document.createElement('strong');
+        textLabel.textContent = 'Link Text: ';
+        const textSpan = document.createElement('span');
+        textSpan.textContent = item.text;
+        textRow.appendChild(textLabel);
+        textRow.appendChild(textSpan);
+        li.appendChild(textRow);
+      }
+
+      return li;
+    }
+
+    async function checkRelMe(event) {
+      if (event) event.preventDefault();
+
+      const targetUrl = normaliseInputUrl(urlInput.value);
       resultsEl.innerHTML = '';
-      statusEl.className = '';
+      metaEl.textContent = '';
 
-      if (!urlInput) {
-        statusEl.textContent = 'Please enter a valid URL.';
-        statusEl.className = 'error';
+      if (!targetUrl) {
+        setStatus('Please enter a valid URL.', 'error');
         return;
       }
 
-      btn.disabled = true;
-      statusEl.textContent = 'Fetching webpage...';
+      urlInput.value = targetUrl;
+      checkBtn.disabled = true;
+      setStatus('Fetching webpage...', 'loading');
 
       try {
-        const response = await fetch(`/api/check?url=${encodeURIComponent(urlInput)}`);
+        const response = await fetch(`/api/check?url=${encodeURIComponent(targetUrl)}`);
         const data = await response.json();
 
-        if (data.error) {
-          throw new Error(data.error);
+        if (!response.ok || data.error) {
+          throw new Error(data.error || `Server returned HTTP ${response.status}`);
         }
+
+        const baseUrl = data.finalUrl || targetUrl;
+        metaEl.textContent = `Inspected: ${baseUrl} (HTTP ${data.status})`;
 
         const parser = new DOMParser();
         const doc = parser.parseFromString(data.html, 'text/html');
@@ -114,41 +448,36 @@
         const matches = [];
 
         candidates.forEach(el => {
-          const relTokens = el.getAttribute('rel').toLowerCase().split(/\s+/);
+          const rawRel = el.getAttribute('rel') || '';
+          const relTokens = rawRel.toLowerCase().trim().split(/\s+/);
           if (relTokens.includes('me')) {
+            const rawHref = (el.getAttribute('href') || '').trim();
+            const resolved = resolveHref(rawHref, baseUrl);
             matches.push({
               tag: el.tagName.toLowerCase(),
-              href: el.getAttribute('href') || '(no href)',
-              rel: el.getAttribute('rel'),
-              text: el.textContent.trim()
+              rel: rawRel.trim(),
+              text: el.textContent.replace(/\s+/g, ' ').trim(),
+              ...resolved
             });
           }
         });
 
         if (matches.length === 0) {
-          statusEl.textContent = `Page loaded (HTTP ${data.status}), but no rel="me" links were found.`;
-          statusEl.className = 'error';
+          setStatus(`Page loaded (HTTP ${data.status}), but no rel="me" links were found.`, 'warn');
         } else {
-          statusEl.textContent = `Success! Found ${matches.length} rel="me" link(s):`;
-          statusEl.className = 'success';
-
+          setStatus(`Found ${matches.length} rel="me" link(s).`, 'success');
           matches.forEach(item => {
-            const li = document.createElement('li');
-            li.innerHTML = `
-              <div><strong>Tag:</strong> <code>&lt;${item.tag}&gt;</code> | <strong>rel:</strong> <code>${item.rel}</code></div>
-              <div><strong>URL:</strong> <a href="${item.href}" target="_blank" rel="noopener">${item.href}</a></div>
-              ${item.text ? `<div><strong>Link Text:</strong> ${item.text}</div>` : ''}
-            `;
-            resultsEl.appendChild(li);
+            resultsEl.appendChild(renderMatchItem(item));
           });
         }
       } catch (err) {
-        statusEl.textContent = `Error: ${err.message}`;
-        statusEl.className = 'error';
+        setStatus(`Error: ${err.message}`, 'error');
       } finally {
-        btn.disabled = false;
+        checkBtn.disabled = false;
       }
     }
+
+    form.addEventListener('submit', checkRelMe);
   </script>
 
 </body>
